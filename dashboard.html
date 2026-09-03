@@ -1,0 +1,4098 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mauli Mitra Dashboard</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            background: #f5f6f8;
+            color: #172033;
+        }
+        /* =====================================================
+HEADER
+===================================================== */
+        
+        header {
+            background: linear-gradient( 135deg, #7b1e1e, #b52b2b);
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+        
+        .brand h1 {
+            font-size: 21px;
+        }
+        
+        .brand p {
+            font-size: 9px;
+            opacity: .8;
+            margin-top: 3px;
+        }
+        
+        .connection {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 9px;
+        }
+        
+        .connection-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: #ef4444;
+        }
+        
+        .connection-dot.online {
+            background: #22c55e;
+            box-shadow: 0 0 7px rgba(34, 197, 94, .7);
+        }
+        /* =====================================================
+CONTAINER
+===================================================== */
+        
+        .container {
+            max-width: 1500px;
+            margin: auto;
+            padding: 20px;
+        }
+        /* =====================================================
+STATS
+===================================================== */
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        
+        .stat {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, .06);
+        }
+        
+        .stat-label {
+            font-size: 8px;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        
+        .stat-value {
+            font-size: 26px;
+            font-weight: bold;
+            margin-top: 6px;
+        }
+        
+        .yellow {
+            color: #d97706;
+        }
+        
+        .blue {
+            color: #2563eb;
+        }
+        
+        .green {
+            color: #16a34a;
+        }
+        
+        .red {
+            color: #dc2626;
+        }
+        /* =====================================================
+BACKEND
+===================================================== */
+        
+        .backend {
+            background: white;
+            padding: 14px;
+            border-radius: 11px;
+            margin-bottom: 18px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, .05);
+        }
+        
+        .backend-title {
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .backend-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 9px;
+        }
+        
+        .backend-row input {
+            flex: 1;
+            padding: 9px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+        }
+        
+        .backend-row button {
+            border: none;
+            background: #2563eb;
+            color: white;
+            padding: 9px 17px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .backend-message {
+            margin-top: 7px;
+            font-size: 8px;
+            color: #64748b;
+        }
+        /* =====================================================
+MAIN
+===================================================== */
+        
+        .main {
+            display: grid;
+            grid-template-columns: 1.35fr .85fr;
+            gap: 18px;
+        }
+        /* =====================================================
+CARD
+===================================================== */
+        
+        .card {
+            background: white;
+            border-radius: 13px;
+            margin-bottom: 18px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, .06);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-header h2 {
+            font-size: 14px;
+        }
+        
+        .card-header span {
+            font-size: 8px;
+            color: #64748b;
+        }
+        
+        .card-body {
+            padding: 15px;
+        }
+        /* =====================================================
+REQUEST
+===================================================== */
+        
+        .requests {
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+        }
+        
+        .request {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 13px;
+            cursor: pointer;
+            transition: .2s;
+        }
+        
+        .request:hover {
+            border-color: #dc2626;
+        }
+        
+        .request.selected {
+            border: 2px solid #dc2626;
+        }
+        
+        .request-top {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .request-left {
+            display: flex;
+            gap: 9px;
+        }
+        
+        .request-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 9px;
+            background: #fee2e2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 19px;
+        }
+        
+        .request-title {
+            font-size: 13px;
+            font-weight: bold;
+        }
+        
+        .request-id {
+            font-size: 9px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+        
+        .status {
+            padding: 5px 9px;
+            height: fit-content;
+            border-radius: 20px;
+            font-size: 8px;
+            font-weight: bold;
+        }
+        
+        .Pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .Accepted {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        
+        .Rejected {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        
+        .Completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+        /* =====================================================
+INFO
+===================================================== */
+        
+        .request-info {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 7px;
+            margin-top: 12px;
+        }
+        
+        .info {
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        
+        .info small {
+            font-size: 7px;
+            color: #64748b;
+        }
+        
+        .info b {
+            display: block;
+            font-size: 9px;
+            margin-top: 4px;
+        }
+        /* =====================================================
+LOCATION
+===================================================== */
+        
+        .location {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .location-title {
+            font-size: 8px;
+            color: #64748b;
+        }
+        
+        .location-value {
+            font-size: 10px;
+            font-weight: bold;
+            color: #166534;
+            margin-top: 4px;
+        }
+        
+        .location-accuracy {
+            font-size: 8px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+        /* =====================================================
+INTENT
+===================================================== */
+        
+        .intent {
+            margin-top: 10px;
+            padding: 10px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+        }
+        
+        .intent-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .intent-label {
+            font-size: 7px;
+            color: #64748b;
+        }
+        
+        .intent-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: #1d4ed8;
+            margin-top: 3px;
+        }
+        
+        .priority {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .progress {
+            height: 7px;
+            margin-top: 7px;
+            background: #e2e8f0;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 20px;
+            transition: .3s;
+        }
+        
+        .transcript {
+            margin-top: 7px;
+            padding: 8px;
+            background: white;
+            border-radius: 6px;
+            font-size: 9px;
+            color: #475569;
+        }
+        /* =====================================================
+ACCEPTED BY
+===================================================== */
+        
+        .accepted {
+            margin-top: 9px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: bold;
+        }
+        /* =====================================================
+ACTIONS
+===================================================== */
+        
+        .actions {
+            display: flex;
+            gap: 7px;
+            margin-top: 10px;
+        }
+        
+        .action {
+            flex: 1;
+            padding: 9px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .accept-btn {
+            background: #16a34a;
+        }
+        
+        .reject-btn {
+            background: #dc2626;
+        }
+        
+        .complete-btn {
+            background: #2563eb;
+        }
+        /* =====================================================
+MAP
+===================================================== */
+        
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 9px;
+        }
+        
+        .map-note {
+            margin-top: 9px;
+            background: #f8fafc;
+            padding: 9px;
+            border-radius: 7px;
+            font-size: 8px;
+            color: #475569;
+        }
+        /* =====================================================
+DETAILS
+===================================================== */
+        
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #94a3b8;
+            font-size: 10px;
+        }
+        
+        .profile {
+            text-align: center;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .profile-image {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .profile h3 {
+            font-size: 14px;
+            margin-top: 7px;
+        }
+        
+        .profile p {
+            font-size: 8px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+        
+        .detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 9px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 9px;
+        }
+        
+        .detail-label {
+            color: #64748b;
+        }
+        
+        .detail-value {
+            font-weight: bold;
+            text-align: right;
+            max-width: 65%;
+        }
+        
+        .call-btn {
+            width: 100%;
+            margin-top: 13px;
+            border: none;
+            background: #16a34a;
+            color: white;
+            padding: 11px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        /* =====================================================
+MICROPHONE
+===================================================== */
+        
+        .mic-status {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 11px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .mic-light {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #94a3b8;
+        }
+        
+        .mic-light.active {
+            background: #dc2626;
+            box-shadow: 0 0 0 7px rgba(220, 38, 38, .12);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            50% {
+                opacity: .4;
+            }
+        }
+        
+        .mic-status-text {
+            font-size: 9px;
+            font-weight: bold;
+        }
+        
+        .mic-help {
+            font-size: 7px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+        
+        .voice {
+            margin-top: 9px;
+            min-height: 60px;
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 7px;
+            font-size: 9px;
+        }
+        
+        .mic-btn {
+            width: 100%;
+            margin-top: 8px;
+            border: none;
+            background: #dc2626;
+            color: white;
+            padding: 10px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        /* =====================================================
+DEVICES
+===================================================== */
+        
+        .device-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .device {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+        
+        .device:hover {
+            border-color: #2563eb;
+        }
+        
+        .device-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .device-icon {
+            width: 32px;
+            height: 32px;
+            background: #eff6ff;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+        
+        .device-id {
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .device-location {
+            font-size: 7px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+        
+        .device-live {
+            font-size: 8px;
+            color: #16a34a;
+            font-weight: bold;
+        }
+        
+        .device-offline {
+            font-size: 8px;
+            color: #94a3b8;
+            font-weight: bold;
+        }
+        /* =====================================================
+TOAST
+===================================================== */
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #0f172a;
+            color: white;
+            padding: 11px 16px;
+            border-radius: 7px;
+            font-size: 9px;
+            display: none;
+            z-index: 9999;
+        }
+        /* =====================================================
+RESPONSIVE
+===================================================== */
+        
+        @media(max-width:1100px) {
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .main {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media(max-width:600px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .request-info {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .backend-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+HEADER
+===================================================== -->
+
+    <header>
+
+        <div class="brand">
+
+            <div class="logo">
+                🙏
+            </div>
+
+            <div>
+
+                <h1>
+                    MAULI MITRA
+                </h1>
+
+                <p>
+                    Smart Warkari Assistance & Volunteer Dashboard
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="connection">
+
+            <div id="connectionDot" class="connection-dot">
+            </div>
+
+            <span id="connectionText">
+
+            BACKEND OFFLINE
+
+        </span>
+
+        </div>
+
+    </header>
+
+
+    <div class="container">
+
+
+        <!-- =====================================================
+STATISTICS
+===================================================== -->
+
+        <div class="stats">
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Total Requests
+                </div>
+
+                <div id="total" class="stat-value">
+
+                    0
+
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Pending
+                </div>
+
+                <div id="pending" class="stat-value yellow">
+
+                    0
+
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Accepted
+                </div>
+
+                <div id="accepted" class="stat-value blue">
+
+                    0
+
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Completed
+                </div>
+
+                <div id="completed" class="stat-value green">
+
+                    0
+
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Rejected
+                </div>
+
+                <div id="rejected" class="stat-value red">
+
+                    0
+
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Live Devices
+                </div>
+
+                <div id="liveDevices" class="stat-value green">
+
+                    0
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+BACKEND CONNECTION
+===================================================== -->
+
+        <div class="backend">
+
+            <div class="backend-title">
+
+                📡 Backend Connection
+
+            </div>
+
+
+            <div class="backend-row">
+
+                <input id="backendUrl" value="http://10.79.73.6:3000">
+
+
+                <button onclick="connectBackend()">
+
+            CONNECT
+
+        </button>
+
+            </div>
+
+
+            <div id="backendMessage" class="backend-message">
+
+                Checking backend...
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+MAIN
+===================================================== -->
+
+        <div class="main">
+
+
+            <!-- =====================================================
+LEFT
+===================================================== -->
+
+            <div>
+
+
+                <!-- =====================================================
+INCOMING REQUESTS
+===================================================== -->
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <h2>
+                            🚨 Live Incoming Requests
+                        </h2>
+
+                        <span>
+            ESP32 BUTTON
+        </span>
+
+                    </div>
+
+
+                    <div class="card-body">
+
+                        <div id="requestList" class="requests">
+
+                            <div class="empty">
+
+                                Waiting for ESP32 button...
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =====================================================
+MAP
+===================================================== -->
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <h2>
+                            📍 Live Device Tracking
+                        </h2>
+
+                        <span>
+            LIVE GPS LOCATION
+        </span>
+
+                    </div>
+
+
+                    <div class="card-body">
+
+                        <div id="map"></div>
+
+
+                        <div class="map-note">
+
+                            📍 No predefined zones are used.
+
+                            <br><br> The marker appears when a connected phone/laptop sends its live GPS coordinates to the backend.
+
+                            <br><br> 🟢 Live device
+
+                            <br> ⚪ Offline device
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =====================================================
+RIGHT
+===================================================== -->
+
+            <div>
+
+
+                <!-- =====================================================
+WARKARI DETAILS
+===================================================== -->
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <h2>
+                            👤 Warkari Details
+                        </h2>
+
+                    </div>
+
+
+                    <div class="card-body">
+
+
+                        <div id="emptyDetails" class="empty">
+
+                            Select a request
+
+                            <br><br> to view details.
+
+                        </div>
+
+
+                        <div id="details" style="display:none;">
+
+
+                            <div class="profile">
+
+                                <img id="profileImage" class="profile-image" src="" alt="Warkari">
+
+
+                                <h3 id="warkariName">
+
+                                    Warkari
+
+                                </h3>
+
+
+                                <p>
+                                    Mauli Mitra Device User
+                                </p>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                    Device ID
+                </span>
+
+                                <span id="dDevice" class="detail-value">
+
+                    —
+
+                </span>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                    Request ID
+                </span>
+
+                                <span id="dRequest" class="detail-value">
+
+                    —
+
+                </span>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                    Device
+                </span>
+
+                                <span id="dDeviceName" class="detail-value">
+
+                    —
+
+                </span>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                    Location
+                </span>
+
+                                <span id="dLocation" class="detail-value">
+
+                    Waiting for live location
+
+                </span>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                    Accuracy
+                </span>
+
+                                <span id="dAccuracy" class="detail-value">
+
+                    —
+
+                </span>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                    Intent
+                </span>
+
+                                <span id="dIntent" class="detail-value">
+
+                    Waiting for voice intent
+
+                </span>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                    Priority
+                </span>
+
+                                <span id="dPriority" class="detail-value">
+
+                    0%
+
+                </span>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                    Status
+                </span>
+
+                                <span id="dStatus" class="detail-value">
+
+                    Pending
+
+                </span>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                    Accepted By
+                </span>
+
+                                <span id="dAccepted" class="detail-value">
+
+                    Not accepted
+
+                </span>
+
+                            </div>
+
+
+                            <button id="callButton" class="call-btn">
+
+                📞 EMERGENCY CALL
+
+            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =====================================================
+MICROPHONE
+===================================================== -->
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <h2>
+                            🎙️ Marathi Voice Intent
+                        </h2>
+
+                        <span>
+            EXTERNAL MICROPHONE
+        </span>
+
+                    </div>
+
+
+                    <div class="card-body">
+
+
+                        <div class="mic-status">
+
+                            <div id="micLight" class="mic-light">
+                            </div>
+
+
+                            <div>
+
+                                <div id="micStatus" class="mic-status-text">
+
+                                    MICROPHONE STANDBY
+
+                                </div>
+
+
+                                <div class="mic-help">
+
+                                    After an ESP32 request arrives, the microphone can listen for Marathi speech.
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div id="voiceTranscript" class="voice">
+
+                            🎙️ Waiting for voice intent...
+
+                        </div>
+
+
+                        <button class="mic-btn" onclick="startMicrophone()">
+
+            🎙️ START MICROPHONE
+
+        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =====================================================
+CURRENT INTENT
+===================================================== -->
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <h2>
+                            🧠 Intent & Priority
+                        </h2>
+
+                    </div>
+
+
+                    <div class="card-body">
+
+                        <div class="intent">
+
+                            <div class="intent-row">
+
+                                <div>
+
+                                    <div class="intent-label">
+                                        DETECTED INTENT
+                                    </div>
+
+                                    <div id="currentIntent" class="intent-name">
+
+                                        Waiting...
+
+                                    </div>
+
+                                </div>
+
+
+                                <div id="currentPriority" class="priority">
+
+                                    0%
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="progress">
+
+                                <div id="priorityFill" class="progress-fill" style="width:0%;">
+
+                                </div>
+
+                            </div>
+
+
+                            <div id="currentTranscript" class="transcript">
+
+                                No voice detected yet.
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =====================================================
+DEVICES
+===================================================== -->
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <h2>
+                            📍 Connected Devices
+                        </h2>
+
+                        <span>
+            LIVE TRACKING
+        </span>
+
+                    </div>
+
+
+                    <div class="card-body">
+
+                        <div id="deviceList" class="device-list">
+
+                            <div class="empty">
+
+                                Waiting for devices...
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div id="toast" class="toast">
+    </div>
+
+
+    <script>
+        // =====================================================
+        // CONFIG
+        // =====================================================
+
+        let BACKEND_URL =
+            localStorage.getItem(
+                "mauliMitraBackend"
+            ) ||
+            "http://10.79.73.6:3000";
+
+
+        let requests = [];
+
+        let devices = [];
+
+        let selectedRequestId = null;
+
+        let knownRequestIds =
+            new Set();
+
+        let recognition = null;
+
+        let microphoneRunning = false;
+
+        let voiceReceived = false;
+
+        let map = null;
+
+        let deviceMarkers = {};
+
+        let accuracyCircles = {};
+
+
+        // =====================================================
+        // START
+        // =====================================================
+
+        window.addEventListener(
+            "load",
+            function() {
+
+                document.getElementById(
+                        "backendUrl"
+                    ).value =
+                    BACKEND_URL;
+
+
+                initializeMap();
+
+
+                connectBackend();
+
+
+                setInterval(
+                    fetchRequests,
+                    1000
+                );
+
+
+                setInterval(
+                    fetchDevices,
+                    2000
+                );
+
+            }
+        );
+
+
+        // =====================================================
+        // CONNECT BACKEND
+        // =====================================================
+
+        async function connectBackend() {
+
+            BACKEND_URL =
+                document.getElementById(
+                    "backendUrl"
+                ).value
+                .trim()
+                .replace(
+                    /\/+$/,
+                    ""
+                );
+
+
+            localStorage.setItem(
+                "mauliMitraBackend",
+                BACKEND_URL
+            );
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        BACKEND_URL +
+                        "/api/health", {
+                            cache: "no-store"
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Backend unavailable"
+                    );
+
+                }
+
+
+                setBackendStatus(
+                    true
+                );
+
+
+                document.getElementById(
+                        "backendMessage"
+                    ).innerText =
+                    "✓ Backend connected";
+
+
+                fetchRequests();
+
+                fetchDevices();
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+
+
+                setBackendStatus(
+                    false
+                );
+
+
+                document.getElementById(
+                        "backendMessage"
+                    ).innerText =
+                    "⚠ Backend offline";
+
+            }
+
+        }
+
+
+        // =====================================================
+        // BACKEND STATUS
+        // =====================================================
+
+        function setBackendStatus(
+            online
+        ) {
+
+            const dot =
+                document.getElementById(
+                    "connectionDot"
+                );
+
+
+            const text =
+                document.getElementById(
+                    "connectionText"
+                );
+
+
+            if (online) {
+
+                dot.classList.add(
+                    "online"
+                );
+
+                text.innerText =
+                    "BACKEND CONNECTED";
+
+            } else {
+
+                dot.classList.remove(
+                    "online"
+                );
+
+                text.innerText =
+                    "BACKEND OFFLINE";
+
+            }
+
+        }
+
+
+        // =====================================================
+        // REQUESTS
+        // =====================================================
+
+        async function fetchRequests() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        BACKEND_URL +
+                        "/api/requests", {
+                            cache: "no-store"
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Request error"
+                    );
+
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                requests =
+                    Array.isArray(data) ?
+                    data : [];
+
+
+                setBackendStatus(
+                    true
+                );
+
+
+                const newRequests =
+                    requests.filter(
+                        function(request) {
+
+                            return !knownRequestIds.has(
+                                request.id
+                            );
+
+                        }
+                    );
+
+
+                requests.forEach(
+                    function(request) {
+
+                        knownRequestIds.add(
+                            request.id
+                        );
+
+                    }
+                );
+
+
+                renderRequests();
+
+                updateStatistics();
+
+
+                if (
+                    newRequests.length > 0
+                ) {
+
+                    const newest =
+                        newRequests[0];
+
+
+                    selectedRequestId =
+                        newest.id;
+
+
+                    showDetails(
+                        newest
+                    );
+
+
+                    updateIntentPanel(
+                        newest
+                    );
+
+
+                    showToast(
+                        "🚨 New request: " +
+                        newest.deviceId
+                    );
+
+
+                    /*
+                        Browser security may prevent
+                        automatic microphone permission.
+                    */
+
+                    setTimeout(
+                        function() {
+
+                            startAutomaticMicrophone(
+                                newest
+                            );
+
+                        },
+                        500
+                    );
+
+                }
+
+
+                if (
+                    selectedRequestId
+                ) {
+
+                    const selected =
+                        requests.find(
+                            function(r) {
+
+                                return (
+                                    r.id ===
+                                    selectedRequestId
+                                );
+
+                            }
+                        );
+
+
+                    if (selected) {
+
+                        showDetails(
+                            selected
+                        );
+
+                        updateIntentPanel(
+                            selected
+                        );
+
+                    }
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+
+                setBackendStatus(
+                    false
+                );
+
+            }
+
+        }
+
+
+        // =====================================================
+        // REQUEST CARD
+        // =====================================================
+
+        function renderRequests() {
+
+            const container =
+                document.getElementById(
+                    "requestList"
+                );
+
+
+            if (
+                requests.length === 0
+            ) {
+
+                container.innerHTML = `
+
+            <div class="empty">
+
+                📭
+
+                <br><br>
+
+                Waiting for ESP32 button...
+
+            </div>
+
+        `;
+
+                return;
+
+            }
+
+
+            container.innerHTML =
+                requests.map(
+                    function(request) {
+
+                        return createRequestCard(
+                            request
+                        );
+
+                    }
+                ).join("");
+
+        }
+
+
+        // =====================================================
+        // CREATE REQUEST CARD
+        // =====================================================
+
+        function createRequestCard(
+            request
+        ) {
+
+            const score =
+                Number(
+                    request.priorityScore
+                ) || 0;
+
+
+            const color =
+                priorityColor(
+                    score
+                );
+
+
+            let location =
+                "Waiting for live location";
+
+
+            let accuracy =
+                "Unknown";
+
+
+            if (
+                request.latitude !== null &&
+                request.latitude !== undefined &&
+                request.longitude !== null &&
+                request.longitude !== undefined
+            ) {
+
+                location =
+                    Number(
+                        request.latitude
+                    ).toFixed(6) +
+                    ", " +
+                    Number(
+                        request.longitude
+                    ).toFixed(6);
+
+
+                if (
+                    request.accuracy !== null &&
+                    request.accuracy !== undefined
+                ) {
+
+                    accuracy =
+                        Math.round(
+                            Number(
+                                request.accuracy
+                            )
+                        ) +
+                        " m";
+
+                }
+
+            }
+
+
+            return `
+
+    <div
+        class="request
+        ${
+            selectedRequestId === request.id
+                ? "selected"
+                : ""
+        }"
+
+        onclick="
+            selectRequest(
+                '${escapeHtml(
+                    request.id
+                )}'
+            )
+        "
+    >
+
+
+        <div class="request-top">
+
+
+            <div class="request-left">
+
+
+                <div class="request-icon">
+
+                    ${getIntentIcon(
+                        request.intent
+                    )}
+
+                </div>
+
+
+                <div>
+
+                    <div class="request-title">
+
+                        ${escapeHtml(
+                            request.type ||
+                            "Emergency Assistance"
+                        )}
+
+                    </div>
+
+
+                    <div class="request-id">
+
+                        ${escapeHtml(
+                            request.id
+                        )}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <span
+                class="
+                    status
+                    ${escapeHtml(
+                        request.status
+                    )}
+                ">
+
+                ${escapeHtml(
+                    request.status
+                )}
+
+            </span>
+
+        </div>
+
+
+        <div class="request-info">
+
+
+            <div class="info">
+
+                <small>
+                    DEVICE
+                </small>
+
+                <b>
+                    ${escapeHtml(
+                        request.deviceId
+                    )}
+                </b>
+
+            </div>
+
+
+            <div class="info">
+
+                <small>
+                    TYPE
+                </small>
+
+                <b>
+                    ${escapeHtml(
+                        request.deviceType ||
+                        "ESP32"
+                    )}
+                </b>
+
+            </div>
+
+
+            <div class="info">
+
+                <small>
+                    INTENT
+                </small>
+
+                <b>
+                    ${escapeHtml(
+                        request.intent
+                    )}
+                </b>
+
+            </div>
+
+
+            <div class="info">
+
+                <small>
+                    TIME
+                </small>
+
+                <b>
+                    ${escapeHtml(
+                        request.time ||
+                        "—"
+                    )}
+                </b>
+
+            </div>
+
+        </div>
+
+
+        <div class="location">
+
+            <div class="location-title">
+
+                📍 LIVE DEVICE LOCATION
+
+            </div>
+
+
+            <div class="location-value">
+
+                ${escapeHtml(
+                    location
+                )}
+
+            </div>
+
+
+            <div class="location-accuracy">
+
+                Accuracy:
+                ${escapeHtml(
+                    accuracy
+                )}
+
+            </div>
+
+        </div>
+
+
+        <div class="intent">
+
+
+            <div class="intent-row">
+
+
+                <div>
+
+                    <div class="intent-label">
+
+                        DETECTED INTENT
+
+                    </div>
+
+
+                    <div class="intent-name">
+
+                        ${escapeHtml(
+                            request.intent
+                        )}
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="priority"
+                    style="
+                        color:${color};
+                    "
+                >
+
+                    ${score}%
+
+                </div>
+
+            </div>
+
+
+            <div class="progress">
+
+                <div
+                    class="progress-fill"
+                    style="
+                        width:${score}%;
+                        background:${color};
+                    "
+                ></div>
+
+            </div>
+
+
+            <div class="transcript">
+
+                ${
+                    request.transcript
+
+                    ?
+
+                    "🗣️ " +
+                    escapeHtml(
+                        request.transcript
+                    )
+
+                    :
+
+                    "🎙️ Waiting for voice intent..."
+
+                }
+
+            </div>
+
+        </div>
+
+
+        ${
+            request.acceptedBy
+
+            ?
+
+            `
+
+            <div class="accepted">
+
+                ✓ Accepted by:
+                ${escapeHtml(
+                    request.acceptedBy
+                )}
+
+            </div>
+
+            `
+
+            :
+
+            ""
+
+        }
+
+
+        ${
+            request.status === "Pending"
+
+            ?
+
+            `
+
+            <div class="actions">
+
+
+                <button
+                    class="
+                        action
+                        accept-btn
+                    "
+
+                    onclick="
+                        event.stopPropagation();
+
+                        updateStatus(
+                            '${escapeHtml(
+                                request.id
+                            )}',
+                            'Accepted'
+                        );
+                    "
+                >
+
+                    ✓ ACCEPT
+
+                </button>
+
+
+                <button
+                    class="
+                        action
+                        reject-btn
+                    "
+
+                    onclick="
+                        event.stopPropagation();
+
+                        updateStatus(
+                            '${escapeHtml(
+                                request.id
+                            )}',
+                            'Rejected'
+                        );
+                    "
+                >
+
+                    ✕ REJECT
+
+                </button>
+
+            </div>
+
+            `
+
+            :
+
+            ""
+
+        }
+
+
+        ${
+            request.status === "Accepted"
+
+            ?
+
+            `
+
+            <div class="actions">
+
+                <button
+                    class="
+                        action
+                        complete-btn
+                    "
+
+                    onclick="
+                        event.stopPropagation();
+
+                        updateStatus(
+                            '${escapeHtml(
+                                request.id
+                            )}',
+                            'Completed'
+                        );
+                    "
+                >
+
+                    ✓ COMPLETE
+
+                </button>
+
+            </div>
+
+            `
+
+            :
+
+            ""
+
+        }
+
+
+    </div>
+
+    `;
+
+}
+
+
+// =====================================================
+// SELECT REQUEST
+// =====================================================
+
+function selectRequest(
+    id
+) {
+
+    selectedRequestId =
+        id;
+
+
+    const request =
+        requests.find(
+            function(r) {
+
+                return (
+                    r.id === id
+                );
+
+            }
+        );
+
+
+    if(!request) {
+        return;
+    }
+
+
+    renderRequests();
+
+    showDetails(
+        request
+    );
+
+    updateIntentPanel(
+        request
+    );
+
+
+    if(
+        request.latitude !== null &&
+        request.longitude !== null
+    ) {
+
+        map.setView(
+
+            [
+                Number(
+                    request.latitude
+                ),
+
+                Number(
+                    request.longitude
+                )
+
+            ],
+
+            16
+
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// DETAILS
+// =====================================================
+
+function showDetails(
+    request
+) {
+
+    document.getElementById(
+        "emptyDetails"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "details"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "warkariName"
+    ).innerText =
+        "Warkari " +
+        request.deviceId;
+
+
+    document.getElementById(
+        "profileImage"
+    ).src =
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300";
+
+
+    document.getElementById(
+        "dDevice"
+    ).innerText =
+        request.deviceId;
+
+
+    document.getElementById(
+        "dRequest"
+    ).innerText =
+        request.id;
+
+
+    document.getElementById(
+        "dDeviceName"
+    ).innerText =
+        request.deviceName ||
+        request.deviceType ||
+        "ESP32";
+
+
+    if(
+        request.latitude !== null &&
+        request.longitude !== null
+    ) {
+
+        document.getElementById(
+            "dLocation"
+        ).innerText =
+
+            Number(
+                request.latitude
+            ).toFixed(6)
+            +
+            ", "
+            +
+            Number(
+                request.longitude
+            ).toFixed(6);
+
+    }
+
+    else {
+
+        document.getElementById(
+            "dLocation"
+        ).innerText =
+            "Waiting for live location";
+
+    }
+
+
+    document.getElementById(
+        "dAccuracy"
+    ).innerText =
+
+        request.accuracy !== null &&
+        request.accuracy !== undefined
+
+        ?
+
+        Math.round(
+            Number(
+                request.accuracy
+            )
+        ) +
+        " metres"
+
+        :
+
+        "Unknown";
+
+
+    document.getElementById(
+        "dIntent"
+    ).innerText =
+        request.intent;
+
+
+    document.getElementById(
+        "dPriority"
+    ).innerText =
+        (
+            request.priorityScore ||
+            0
+        ) +
+        "%";
+
+
+    document.getElementById(
+        "dStatus"
+    ).innerText =
+        request.status;
+
+
+    document.getElementById(
+        "dAccepted"
+    ).innerText =
+        request.acceptedBy ||
+        "Not accepted";
+
+
+    /*
+        Only CALL option.
+        No phone number is displayed.
+    */
+
+    document.getElementById(
+        "callButton"
+    ).onclick =
+        function() {
+
+            alert(
+                "Call option selected for " +
+                request.deviceId
+            );
+
+        };
+
+}
+
+
+// =====================================================
+// INTENT PANEL
+// =====================================================
+
+function updateIntentPanel(
+    request
+) {
+
+    const score =
+        Number(
+            request.priorityScore
+        ) || 0;
+
+
+    document.getElementById(
+        "currentIntent"
+    ).innerText =
+        request.intent;
+
+
+    document.getElementById(
+        "currentPriority"
+    ).innerText =
+        score +
+        "%";
+
+
+    document.getElementById(
+        "priorityFill"
+    ).style.width =
+        score +
+        "%";
+
+
+    document.getElementById(
+        "priorityFill"
+    ).style.background =
+        priorityColor(
+            score
+        );
+
+
+    document.getElementById(
+        "currentTranscript"
+    ).innerText =
+
+        request.transcript
+
+        ?
+
+        "🗣️ " +
+        request.transcript
+
+        :
+
+        "🎙️ Waiting for voice intent...";
+
+}
+
+
+// =====================================================
+// UPDATE STATUS
+// =====================================================
+
+async function updateStatus(
+    id,
+    status
+) {
+
+    let volunteer = null;
+
+
+    if(
+        status === "Accepted"
+    ) {
+
+        volunteer =
+            prompt(
+                "Enter volunteer name:",
+                "Volunteer"
+            );
+
+
+        if(!volunteer) {
+            return;
+        }
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+
+                BACKEND_URL +
+                "/api/requests/" +
+                encodeURIComponent(
+                    id
+                ) +
+                "/status",
+
+                {
+
+                    method:
+                        "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            status:
+                                status,
+
+                            acceptedBy:
+                                volunteer
+
+                        })
+
+                }
+
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if(
+            !response.ok
+        ) {
+
+            throw new Error(
+                result.message ||
+                "Update failed"
+            );
+
+        }
+
+
+        showToast(
+            "✓ Request " +
+            status
+        );
+
+
+        fetchRequests();
+
+    }
+
+    catch(error) {
+
+        console.error(
+            error
+        );
+
+
+        showToast(
+            "⚠ Update failed"
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// STATISTICS
+// =====================================================
+
+function updateStatistics() {
+
+    document.getElementById(
+        "total"
+    ).innerText =
+        requests.length;
+
+
+    document.getElementById(
+        "pending"
+    ).innerText =
+
+        requests.filter(
+            function(r) {
+
+                return (
+                    r.status ===
+                    "Pending"
+                );
+
+            }
+        ).length;
+
+
+    document.getElementById(
+        "accepted"
+    ).innerText =
+
+        requests.filter(
+            function(r) {
+
+                return (
+                    r.status ===
+                    "Accepted"
+                );
+
+            }
+        ).length;
+
+
+    document.getElementById(
+        "completed"
+    ).innerText =
+
+        requests.filter(
+            function(r) {
+
+                return (
+                    r.status ===
+                    "Completed"
+                );
+
+            }
+        ).length;
+
+
+    document.getElementById(
+        "rejected"
+    ).innerText =
+
+        requests.filter(
+            function(r) {
+
+                return (
+                    r.status ===
+                    "Rejected"
+                );
+
+            }
+        ).length;
+
+}
+
+
+// =====================================================
+// MICROPHONE
+// =====================================================
+
+function startAutomaticMicrophone(
+    request
+) {
+
+    startSpeechRecognition(
+        request
+    );
+
+}
+
+
+function startMicrophone() {
+
+    if(
+        !selectedRequestId
+    ) {
+
+        showToast(
+            "Select a request first."
+        );
+
+        return;
+
+    }
+
+
+    const request =
+        requests.find(
+            function(r) {
+
+                return (
+                    r.id ===
+                    selectedRequestId
+                );
+
+            }
+        );
+
+
+    if(request) {
+
+        startSpeechRecognition(
+            request
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// SPEECH RECOGNITION
+// =====================================================
+
+function startSpeechRecognition(
+    request
+) {
+
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+
+    if(
+        !SpeechRecognition
+    ) {
+
+        document.getElementById(
+            "micStatus"
+        ).innerText =
+            "Speech recognition not supported";
+
+        return;
+
+    }
+
+
+    if(
+        microphoneRunning
+    ) {
+
+        try {
+
+            recognition.stop();
+
+        }
+
+        catch(e) {}
+
+    }
+
+
+    recognition =
+        new SpeechRecognition();
+
+
+    recognition.lang =
+        "mr-IN";
+
+
+    recognition.continuous =
+        false;
+
+
+    recognition.interimResults =
+        true;
+
+
+    voiceReceived =
+        false;
+
+
+    recognition.onstart =
+        function() {
+
+            microphoneRunning =
+                true;
+
+
+            document.getElementById(
+                "micLight"
+            ).classList.add(
+                "active"
+            );
+
+
+            document.getElementById(
+                "micStatus"
+            ).innerText =
+                "🎙️ LISTENING — SPEAK MARATHI";
+
+
+            document.getElementById(
+                "voiceTranscript"
+            ).innerText =
+                "🎙️ Speak now...";
+
+        };
+
+
+    recognition.onresult =
+        function(event) {
+
+            let text = "";
+
+
+            for(
+                let i =
+                    event.resultIndex;
+
+                i <
+                    event.results.length;
+
+                i++
+            ) {
+
+                text +=
+                    event.results[i][0]
+                        .transcript;
+
+            }
+
+
+            text =
+                text.trim();
+
+
+            if(!text) {
+                return;
+            }
+
+
+            voiceReceived =
+                true;
+
+
+            document.getElementById(
+                "voiceTranscript"
+            ).innerText =
+                "🗣️ " +
+                text;
+
+
+            const result =
+                detectMarathiIntent(
+                    text
+                );
+
+
+            updateIntentLocal(
+                result,
+                text
+            );
+
+
+            updateBackendIntent(
+                request.id,
+                result,
+                text
+            );
+
+        };
+
+
+    recognition.onerror =
+        function(event) {
+
+            console.error(
+                event.error
+            );
+
+
+            microphoneRunning =
+                false;
+
+
+            document.getElementById(
+                "micLight"
+            ).classList.remove(
+                "active"
+            );
+
+
+            if(
+                event.error ===
+                "not-allowed"
+            ) {
+
+                document.getElementById(
+                    "micStatus"
+                ).innerText =
+                    "⚠ MICROPHONE PERMISSION DENIED";
+
+            }
+
+            else {
+
+                document.getElementById(
+                    "micStatus"
+                ).innerText =
+                    "⚠ MICROPHONE ERROR";
+
+            }
+
+        };
+
+
+    recognition.onend =
+        function() {
+
+            microphoneRunning =
+                false;
+
+
+            document.getElementById(
+                "micLight"
+            ).classList.remove(
+                "active"
+            );
+
+
+            document.getElementById(
+                "micStatus"
+            ).innerText =
+
+                voiceReceived
+
+                ?
+
+                "✓ VOICE INTENT DETECTED"
+
+                :
+
+                "MICROPHONE STANDBY";
+
+        };
+
+
+    try {
+
+        recognition.start();
+
+    }
+
+    catch(error) {
+
+        console.error(
+            error
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// MARATHI INTENT
+// =====================================================
+
+function detectMarathiIntent(
+    text
+) {
+
+    const t =
+        String(text)
+        .toLowerCase()
+        .normalize("NFC");
+
+
+    const rules = [
+
+        {
+
+            intent:
+                "Medical Help",
+
+            score:
+                95,
+
+            level:
+                "CRITICAL",
+
+            words: [
+
+                "डॉक्टर",
+                "डॉक्टर पाहिजे",
+                "डॉक्टर हवे",
+                "वैद्यकीय",
+                "मेडिकल",
+                "औषध",
+                "औषधे",
+                "दवाखाना",
+                "हॉस्पिटल",
+                "रुग्णालय",
+                "तब्येत",
+                "तब्येत खराब",
+                "जखम",
+                "रक्त",
+                "दुखत",
+                "अॅम्ब्युलन्स",
+                "एम्बुलन्स"
+
+            ]
+
+        },
+
+
+        {
+
+            intent:
+                "Emergency",
+
+            score:
+                90,
+
+            level:
+                "CRITICAL",
+
+            words: [
+
+                "इमर्जन्सी",
+                "आपत्कालीन",
+                "तातडीची मदत",
+                "ताबडतोब मदत",
+                "मदत करा",
+                "वाचवा",
+                "धोका",
+                "जीवाला धोका"
+
+            ]
+
+        },
+
+
+        {
+
+            intent:
+                "Lost Person",
+
+            score:
+                70,
+
+            level:
+                "HIGH",
+
+            words: [
+
+                "हरवलो",
+                "हरवले",
+                "हरवली",
+                "हरवला",
+                "वाट चुकलो",
+                "वाट चुकले",
+                "वाट चुकली",
+                "माझी वाट चुकली",
+                "गहाळ",
+                "सापडत नाही"
+
+            ]
+
+        },
+
+
+        {
+
+            intent:
+                "Food",
+
+            score:
+                40,
+
+            level:
+                "MEDIUM",
+
+            words: [
+
+                "जेवण",
+                "अन्न",
+                "खायला",
+                "भूक",
+                "भूक लागली",
+                "भोजन"
+
+            ]
+
+        },
+
+
+        {
+
+            intent:
+                "Water",
+
+            score:
+                35,
+
+            level:
+                "LOW",
+
+            words: [
+
+                "पाणी",
+                "पाणी पाहिजे",
+                "पाणी हवे",
+                "पाणी द्या",
+                "प्यायला पाणी",
+                "पिण्याचे पाणी"
+
+            ]
+
+        }
+
+    ];
+
+
+    for(
+        const rule of rules
+    ) {
+
+        for(
+            const word of rule.words
+        ) {
+
+            if(
+                t.includes(
+                    word
+                )
+            ) {
+
+                return {
+
+                    intent:
+                        rule.intent,
+
+                    priority:
+                        rule.score,
+
+                    level:
+                        rule.level,
+
+                    confidence:
+                        95
+
+                };
+
+            }
+
+        }
+
+    }
+
+
+    return {
+
+        intent:
+            "Other Assistance",
+
+        priority:
+            50,
+
+        level:
+            "MEDIUM",
+
+        confidence:
+            50
+
+    };
+
+}
+
+
+// =====================================================
+// UPDATE LOCAL INTENT
+// =====================================================
+
+function updateIntentLocal(
+    result,
+    transcript
+) {
+
+    document.getElementById(
+        "currentIntent"
+    ).innerText =
+        result.intent;
+
+
+    document.getElementById(
+        "currentPriority"
+    ).innerText =
+        result.priority +
+        "%";
+
+
+    document.getElementById(
+        "priorityFill"
+    ).style.width =
+        result.priority +
+        "%";
+
+
+    document.getElementById(
+        "priorityFill"
+    ).style.background =
+        priorityColor(
+            result.priority
+        );
+
+
+    document.getElementById(
+        "currentTranscript"
+    ).innerText =
+        "🗣️ " +
+        transcript;
+
+}
+
+
+// =====================================================
+// SEND INTENT TO BACKEND
+// =====================================================
+
+async function updateBackendIntent(
+    requestId,
+    result,
+    transcript
+) {
+
+    try {
+
+        await fetch(
+
+            BACKEND_URL +
+            "/api/requests/" +
+            encodeURIComponent(
+                requestId
+            ) +
+            "/intent",
+
+            {
+
+                method:
+                    "PATCH",
+
+                headers: {
+
+                    "Content-Type":
+                        "application/json"
+
+                },
+
+                body:
+                    JSON.stringify({
+
+                        intent:
+                            result.intent,
+
+                        transcript:
+                            transcript,
+
+                        intentConfidence:
+                            result.confidence,
+
+                        priorityScore:
+                            result.priority,
+
+                        priority:
+                            result.level
+
+                    })
+
+            }
+
+        );
+
+
+        showToast(
+            "🧠 " +
+            result.intent +
+            " — " +
+            result.priority +
+            "%"
+        );
+
+
+        fetchRequests();
+
+    }
+
+    catch(error) {
+
+        console.error(
+            error
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// MAP
+// =====================================================
+
+function initializeMap() {
+
+    map =
+        L.map(
+            "map"
+        ).setView(
+            [
+                18.5204,
+                73.8567
+            ],
+            11
+        );
+
+
+    L.tileLayer(
+
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+        {
+
+            maxZoom:
+                19,
+
+            attribution:
+                "&copy; OpenStreetMap contributors"
+
+        }
+
+    ).addTo(
+        map
+    );
+
+}
+
+
+// =====================================================
+// UPDATE DEVICE MARKERS
+// =====================================================
+
+function updateDeviceMarkers(
+    list
+) {
+
+    const active =
+        new Set();
+
+
+    list.forEach(
+        function(device) {
+
+            if(
+                device.latitude === null ||
+                device.latitude === undefined ||
+                device.longitude === null ||
+                device.longitude === undefined
+            ) {
+
+                return;
+
+            }
+
+
+            const id =
+                device.deviceId;
+
+
+            active.add(
+                id
+            );
+
+
+            const position = [
+
+                Number(
+                    device.latitude
+                ),
+
+                Number(
+                    device.longitude
+                )
+
+            ];
+
+
+            if(
+                !deviceMarkers[id]
+            ) {
+
+                deviceMarkers[id] =
+                    L.circleMarker(
+                        position,
+                        {
+
+                            radius:
+                                9,
+
+                            weight:
+                                3,
+
+                            fillOpacity:
+                                .9
+
+                        }
+                    )
+                    .addTo(
+                        map
+                    );
+
+            }
+
+            else {
+
+                deviceMarkers[id]
+                    .setLatLng(
+                        position
+                    );
+
+            }
+
+
+            deviceMarkers[id]
+                .setPopupContent(
+
+                    createPopup(
+                        device
+                    )
+
+                );
+
+
+            // Accuracy circle
+
+            if(
+                device.accuracy &&
+                Number(
+                    device.accuracy
+                ) > 0
+            ) {
+
+                if(
+                    !accuracyCircles[id]
+                ) {
+
+                    accuracyCircles[id] =
+                        L.circle(
+                            position,
+                            {
+
+                                radius:
+                                    Number(
+                                        device.accuracy
+                                    ),
+
+                                weight:
+                                    1,
+
+                                fillOpacity:
+                                    .05
+
+                            }
+                        )
+                        .addTo(
+                            map
+                        );
+
+                }
+
+                else {
+
+                    accuracyCircles[id]
+                        .setLatLng(
+                            position
+                        );
+
+
+                    accuracyCircles[id]
+                        .setRadius(
+                            Number(
+                                device.accuracy
+                            )
+                        );
+
+                }
+
+            }
+
+        }
+    );
+
+
+    // Remove old markers
+
+    Object.keys(
+        deviceMarkers
+    ).forEach(
+        function(id) {
+
+            if(
+                !active.has(id)
+            ) {
+
+                map.removeLayer(
+                    deviceMarkers[id]
+                );
+
+                delete deviceMarkers[id];
+
+            }
+
+        }
+    );
+
+
+    Object.keys(
+        accuracyCircles
+    ).forEach(
+        function(id) {
+
+            if(
+                !active.has(id)
+            ) {
+
+                map.removeLayer(
+                    accuracyCircles[id]
+                );
+
+                delete accuracyCircles[id];
+
+            }
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// POPUP
+// =====================================================
+
+function createPopup(
+    device
+) {
+
+    return `
+
+        <b>🌺 MAULI MITRA</b>
+
+        <br><br>
+
+        <b>Device:</b>
+        ${escapeHtml(
+            device.deviceId
+        )}
+
+        <br>
+
+        <b>Status:</b>
+        ${
+            device.online
+                ? "🟢 LIVE"
+                : "⚪ OFFLINE"
+        }
+
+        <br>
+
+        <b>Latitude:</b>
+        ${Number(
+            device.latitude
+        ).toFixed(6)}
+
+        <br>
+
+        <b>Longitude:</b>
+        ${Number(
+            device.longitude
+        ).toFixed(6)}
+
+        <br>
+
+        <b>Accuracy:</b>
+        ${
+            device.accuracy
+                ? Math.round(
+                    Number(
+                        device.accuracy
+                    )
+                  ) +
+                  " m"
+                : "Unknown"
+        }
+
+        <br><br>
+
+        <b>Last Seen:</b>
+        ${escapeHtml(
+            device.lastSeen ||
+            "—"
+        )}
+
+    `;
+
+}
+
+
+// =====================================================
+// FETCH DEVICES
+// =====================================================
+
+async function fetchDevices() {
+
+    try {
+
+        const response =
+            await fetch(
+
+                BACKEND_URL +
+                "/api/devices",
+
+                {
+                    cache:
+                        "no-store"
+                }
+
+            );
+
+
+        if(!response.ok) {
+            throw new Error(
+                "Device API error"
+            );
+        }
+
+
+        const data =
+            await response.json();
+
+
+        devices =
+            data.devices ||
+            [];
+
+
+        renderDevices();
+
+        updateDeviceMarkers(
+            devices
+        );
+
+
+        document.getElementById(
+            "liveDevices"
+        ).innerText =
+
+            devices.filter(
+                function(device) {
+
+                    return device.online;
+
+                }
+            ).length;
+
+    }
+
+    catch(error) {
+
+        console.error(
+            error
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// DEVICE LIST
+// =====================================================
+
+function renderDevices() {
+
+    const container =
+        document.getElementById(
+            "deviceList"
+        );
+
+
+    if(
+        devices.length === 0
+    ) {
+
+        container.innerHTML = `
+
+            <div class="empty">
+
+                No devices registered.
+
+                <br><br>
+
+                Waiting for ESP32...
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        devices.map(
+            function(device) {
+
+                let location =
+                    "Location unavailable";
+
+
+                if(
+                    device.latitude !== null &&
+                    device.longitude !== null
+                ) {
+
+                    location =
+
+                        Number(
+                            device.latitude
+                        ).toFixed(5)
+                        +
+                        ", "
+                        +
+                        Number(
+                            device.longitude
+                        ).toFixed(5);
+
+                }
+
+
+                return `
+
+                <div
+                    class="device"
+
+                    onclick="
+                        focusDevice(
+                            '${escapeHtml(
+                                device.deviceId
+                            )}'
+                        )
+                    "
+                >
+
+
+                    <div class="device-left">
+
+
+                        <div class="device-icon">
+
+                            📍
+
+                        </div>
+
+
+                        <div>
+
+                            <div class="device-id">
+
+                                ${escapeHtml(
+                                    device.deviceId
+                                )}
+
+                            </div>
+
+
+                            <div class="device-location">
+
+                                ${escapeHtml(
+                                    location
+                                )}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            ${
+                                device.online
+                                    ? "device-live"
+                                    : "device-offline"
+                            }
+                        "
+                    >
+
+                        ${
+                            device.online
+                                ? "● LIVE"
+                                : "● OFFLINE"
+                        }
+
+                    </div>
+
+                </div>
+
+                `;
+
+            }
+        ).join("");
+
+}
+
+
+// =====================================================
+// FOCUS DEVICE
+// =====================================================
+
+function focusDevice(
+    deviceId
+) {
+
+    const device =
+        devices.find(
+            function(d) {
+
+                return (
+                    d.deviceId ===
+                    deviceId
+                );
+
+            }
+        );
+
+
+    if(!device) {
+        return;
+    }
+
+
+    if(
+        device.latitude !== null &&
+        device.longitude !== null
+    ) {
+
+        map.setView(
+
+            [
+
+                Number(
+                    device.latitude
+                ),
+
+                Number(
+                    device.longitude
+                )
+
+            ],
+
+            16
+
+        );
+
+
+        if(
+            deviceMarkers[
+                deviceId
+            ]
+        ) {
+
+            deviceMarkers[
+                deviceId
+            ].openPopup();
+
+        }
+
+    }
+
+}
+
+
+// =====================================================
+// INTENT ICON
+// =====================================================
+
+function getIntentIcon(
+    intent
+) {
+
+    switch(
+        intent
+    ) {
+
+        case "Medical Help":
+            return "🏥";
+
+        case "Emergency":
+            return "🚨";
+
+        case "Lost Person":
+            return "👤";
+
+        case "Food":
+            return "🍱";
+
+        case "Water":
+            return "💧";
+
+        default:
+            return "🆘";
+
+    }
+
+}
+
+
+// =====================================================
+// PRIORITY COLOR
+// =====================================================
+
+function priorityColor(
+    score
+) {
+
+    score =
+        Number(
+            score
+        ) || 0;
+
+
+    if(
+        score >= 85
+    ) {
+
+        return "#dc2626";
+
+    }
+
+
+    if(
+        score >= 60
+    ) {
+
+        return "#f59e0b";
+
+    }
+
+
+    if(
+        score >= 40
+    ) {
+
+        return "#2563eb";
+
+    }
+
+
+    return "#16a34a";
+
+}
+
+
+// =====================================================
+// ESCAPE HTML
+// =====================================================
+
+function escapeHtml(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+
+    .replace(
+        /</g,
+        "&lt;"
+    )
+
+    .replace(
+        />/g,
+        "&gt;"
+    )
+
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+// =====================================================
+// TOAST
+// =====================================================
+
+function showToast(
+    message
+) {
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.innerText =
+        message;
+
+
+    toast.style.display =
+        "block";
+
+
+    setTimeout(
+        function() {
+
+            toast.style.display =
+                "none";
+
+        },
+        3000
+    );
+
+}
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mauli Mitra Live Tracker</title>
+
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f6f8;
+            margin: 0;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .card {
+            max-width: 550px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .1);
+        }
+        
+        h1 {
+            color: #7b1e1e;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f1f5f9;
+        }
+        
+        .live {
+            color: #16a34a;
+            font-weight: bold;
+        }
+        
+        .error {
+            color: #dc2626;
+            font-weight: bold;
+        }
+        
+        .info {
+            margin-top: 20px;
+            text-align: left;
+            line-height: 1.8;
+        }
+        
+        button {
+            margin-top: 20px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 7px;
+            background: #7b1e1e;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <div class="card">
+
+        <h1>
+            🌺 Mauli Mitra
+        </h1>
+
+        <p>
+            Live Device Location Tracker
+        </p>
+
+
+        <div id="status" class="status">
+
+            Starting location tracking...
+
+        </div>
+
+
+        <div class="info">
+
+            <b>Device:</b>
+
+            <span id="device">
+            MM-001
+        </span>
+
+            <br>
+
+
+            <b>Latitude:</b>
+
+            <span id="latitude">
+            —
+        </span>
+
+            <br>
+
+
+            <b>Longitude:</b>
+
+            <span id="longitude">
+            —
+        </span>
+
+            <br>
+
+
+            <b>Accuracy:</b>
+
+            <span id="accuracy">
+            —
+        </span>
+
+            <br>
+
+
+            <b>Last Update:</b>
+
+            <span id="updated">
+            —
+        </span>
+
+        </div>
+
+
+        <button onclick="startTracking()">
+
+        📍 START LIVE LOCATION
+
+    </button>
+
+    </div>
+
+
+    <script>
+        // =====================================================
+        // CONFIG
+        // =====================================================
+
+        const BACKEND_URL =
+            "http://10.79.73.6:3000";
+
+        const DEVICE_ID =
+            "MM-001";
+
+
+        // =====================================================
+        // LOCATION WATCH ID
+        // =====================================================
+
+        let watchId = null;
+
+
+        // =====================================================
+        // START
+        // =====================================================
+
+        window.addEventListener(
+            "load",
+            function() {
+
+                startTracking();
+
+            }
+        );
+
+
+        // =====================================================
+        // START TRACKING
+        // =====================================================
+
+        function startTracking() {
+
+            if (!navigator.geolocation) {
+
+                showError(
+                    "Browser does not support GPS location."
+                );
+
+                return;
+
+            }
+
+
+            document.getElementById(
+                    "status"
+                ).innerText =
+                "Requesting location permission...";
+
+
+            watchId =
+                navigator.geolocation.watchPosition(
+
+                    locationSuccess,
+
+                    locationError,
+
+                    {
+
+                        enableHighAccuracy: true,
+
+                        maximumAge: 2000,
+
+                        timeout: 10000
+
+                    }
+
+                );
+
+        }
+
+
+        // =====================================================
+        // LOCATION SUCCESS
+        // =====================================================
+
+        async function locationSuccess(
+            position
+        ) {
+
+            const latitude =
+                position.coords.latitude;
+
+
+            const longitude =
+                position.coords.longitude;
+
+
+            const accuracy =
+                position.coords.accuracy;
+
+
+            document.getElementById(
+                    "latitude"
+                ).innerText =
+                latitude.toFixed(6);
+
+
+            document.getElementById(
+                    "longitude"
+                ).innerText =
+                longitude.toFixed(6);
+
+
+            document.getElementById(
+                    "accuracy"
+                ).innerText =
+                Math.round(
+                    accuracy
+                ) +
+                " metres";
+
+
+            document.getElementById(
+                    "updated"
+                ).innerText =
+                new Date().toLocaleTimeString();
+
+
+            document.getElementById(
+                    "status"
+                ).innerHTML =
+                '<span class="live">● LIVE LOCATION ACTIVE</span>';
+
+
+            // =================================================
+            // SEND TO BACKEND
+            // =================================================
+
+            try {
+
+                const response =
+                    await fetch(
+
+                        BACKEND_URL +
+                        "/api/devices/location",
+
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type": "application/json"
+
+                            },
+
+                            body: JSON.stringify({
+
+                                deviceId: DEVICE_ID,
+
+                                deviceName: "Laptop connected to MM-001",
+
+                                deviceType: "Laptop + ESP32",
+
+                                latitude: latitude,
+
+                                longitude: longitude,
+
+                                accuracy: accuracy
+
+                            })
+
+                        }
+
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Backend rejected location"
+                    );
+
+                }
+
+
+                console.log(
+                    "Location sent:",
+                    latitude,
+                    longitude
+                );
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+
+
+                document.getElementById(
+                        "status"
+                    ).innerHTML =
+                    '<span class="error">⚠ Location server unavailable</span>';
+
+            }
+
+        }
+
+
+        // =====================================================
+        // LOCATION ERROR
+        // =====================================================
+
+        function locationError(
+            error
+        ) {
+
+            let message =
+                "Unable to get location.";
+
+
+            if (
+                error.code ===
+                1
+            ) {
+
+                message =
+                    "Location permission denied. Allow location access in browser.";
+
+            } else if (
+                error.code ===
+                2
+            ) {
+
+                message =
+                    "Location unavailable.";
+
+            } else if (
+                error.code ===
+                3
+            ) {
+
+                message =
+                    "Location request timed out.";
+
+            }
+
+
+            showError(
+                message
+            );
+
+        }
+
+
+        // =====================================================
+        // SHOW ERROR
+        // =====================================================
+
+        function showError(
+            message
+        ) {
+
+            document.getElementById(
+                    "status"
+                ).innerHTML =
+                '<span class="error">⚠ ' +
+                message +
+                '</span>';
+
+        }
+    </script>
+
+</body>
+
+</html>
